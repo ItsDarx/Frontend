@@ -1,15 +1,12 @@
-.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD EMPLEADOS</title>
-     <!-- Bootstrap CSS -->
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-      <!-- Incluye jQuery UI -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/ba se/jquery-ui.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
@@ -17,7 +14,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </head>
 
-</head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -30,11 +26,187 @@
               <li class="nav-item">
                 <a class="nav-link " aria-current="page" href="index.html">Inicio</a>
               </li>
-       
             </ul>
           </div>
         </div>
     </nav>
+    
+    <script>
+        let url = 'https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess';
+
+        const fetchOptions = {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        };
+
+        fetch(url, fetchOptions)
+            .then(response => response.json())
+            .then(data => mostrarData(data))
+            .catch(error => console.log(error));
+
+        const mostrarData = (data) => {
+            console.log(data);
+            let body = "";
+            for (var i = 0; i < data.length; i++) {
+                body += `<tr>
+                            <td>${data[i].id}</td>
+                            <td>${data[i].nombre}</td>
+                            <td>${data[i].salario}</td>
+                            <td>
+                                <button class="btn btn-warning" onclick="openEditModal(${data[i].id}, '${data[i].nombre}', '${data[i].salario}')">Editar</button>
+                                <button class="btn btn-danger" onclick="eliminarUsuario(${data[i].id})">Eliminar</button>
+                            </td>
+                        </tr>`;
+            }
+            document.getElementById('data').getElementsByTagName('tbody')[0].innerHTML = body;
+        };
+
+        function agregarUsuario() {
+            const newNombre = document.getElementById('nombre').value.trim();
+            const newSalario = document.getElementById('salario').value.trim();
+
+            if (newNombre === '' || newSalario === '') {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            if (!/^[a-zA-Z\s]+$/.test(newNombre)) {
+                alert('Por favor, ingrese un nombre válido que solo contenga letras.');
+                return;
+            }
+
+            if (!/^\d*\.?\d+$/.test(newSalario) || parseFloat(newSalario) < 0) {
+                alert('Por favor, ingrese un salario válido como número positivo.');
+                return;
+            }
+
+            const confirmacion = window.confirm('¿Está seguro que desea guardar el usuario?');
+
+            if (!confirmacion) {
+                return;
+            }
+
+            const postUrl = 'https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess';
+
+            const newUserData = {
+                nombre: newNombre,
+                salario: newSalario,
+            };
+
+            const postOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newUserData),
+            };
+
+            fetch(postUrl, postOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Respuesta POST:', data);
+                    alert('Usuario agregado exitosamente');
+                    location.reload();
+                })
+                .catch(error => console.error('Error en la solicitud POST:', error));
+        }
+
+        async function eliminarUsuario(id) {
+            const confirmacion = confirm('¿Estás seguro de que quieres eliminar este usuario?');
+
+            if (confirmacion) {
+                const deleteUrl = `https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess/${id}`;
+
+                const deleteOptions = {
+                    method: 'DELETE',
+                };
+
+                try {
+                    const response = await fetch(deleteUrl, deleteOptions);
+
+                    if (response.status === 204) {
+                        console.log('Usuario eliminado exitosamente');
+                        alert('Usuario eliminado exitosamente');
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        location.reload();
+                    } else {
+                        console.error('Error en la solicitud DELETE. Estado:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Error en la solicitud DELETE:', error);
+                }
+            }
+        }
+
+        function openEditModal(id, nombre, salario) {
+            document.getElementById('newName').value = nombre;
+            document.getElementById('newSalary').value = salario;
+
+            document.getElementById('editModal').style.display = 'block';
+
+            window.currentUserId = id;
+            window.currentUserName = nombre;
+            window.currentUserSalary = salario;
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function editarUsuario() {
+            const nuevoNombre = document.getElementById('newName').value;
+            const nuevoSalario = document.getElementById('newSalary').value;
+
+            if (nuevoNombre === '' || nuevoSalario === '') {
+                alert('Por favor, complete todos los campos.');
+                return;
+            }
+
+            if (!/^[a-zA-Z\s]+$/.test(nuevoNombre)) {
+                alert('Por favor, ingrese un nombre válido que solo contenga letras.');
+                return;
+            }
+
+            if (!/^\d*\.?\d+$/.test(nuevoSalario) || parseFloat(nuevoSalario) < 0) {
+                alert('Por favor, ingrese un salario válido como número positivo.');
+                return;
+            }
+
+            const confirmacion = window.confirm('¿Está seguro que desea actualizar el usuario?');
+
+            if (!confirmacion) {
+                return;
+            }
+
+            const putUrl = `https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess/${window.currentUserId}`;
+
+            const userData = {
+                nombre: nuevoNombre,
+                salario: nuevoSalario,
+            };
+
+            const putOptions = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            };
+
+            fetch(putUrl, putOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Respuesta PUT:', data);
+                    alert('Usuario actualizado exitosamente');
+                    location.reload("index.html");
+                })
+                .catch(error => console.error('Error en la solicitud PUT:', error));
+
+            closeModal();
+        }
+    </script>
+
     <div id="editModal" class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -60,6 +232,7 @@
             </div>
         </div>
     </div>
+
     <div class="container ">
         <h1 class="text-center">EMPLEADOS</h1>
         <div class="row">
@@ -73,8 +246,8 @@
                     
                     <button type="button" class="btn btn-dark" onclick="agregarUsuario()">Agregar Usuario</button> <br> <br> 
                 </form>
-
             </div>
+
             <div class="col-md-8 col-sm-12">
                 <div class="container mt-3 table-responsive">
                     <table id="data" class="table table-bordered border-dark">
@@ -88,196 +261,9 @@
                         </thead>
                         <tbody class="align-middle"></tbody>
                     </table>
-<script>
-    let url = 'http://ec2-54-166-136-72.compute-1.amazonaws.com/employess';
-        fetch(url)
-            .then(response => response.json())
-            .then(data => mostrarData(data))
-            .catch(error => console.log(error));
-
-            const mostrarData = (data) => {
-    console.log(data);
-    let body = "";
-    for (var i = 0; i < data.length; i++) {
-        body += `<tr>
-                    <td>${data[i].id}</td>
-                    <td>${data[i].nombre}</td>
-                    <td>${data[i].salario}</td>
-                    <td>
-                        <button class="btn btn-warning" onclick="openEditModal(${data[i].id}, '${data[i].nombre}', '${data[i].salario}')">Editar</button>
-
-                        <button class="btn btn-danger" onclick="eliminarUsuario(${data[i].id})">Eliminar</button>
-                    </td>
-                 </tr>`;
-    }
-    document.getElementById('data').getElementsByTagName('tbody')[0].innerHTML = body;
-    }
-    function agregarUsuario() {
-    const newNombre = document.getElementById('nombre').value.trim();
-    const newSalario = document.getElementById('salario').value.trim();
-
-    // Validar que los campos no estén vacíos
-    if (newNombre === '' || newSalario === '') {
-        alert('Por favor, complete todos los campos.');
-        return;
-    }
-
-    // Validar que el nombre solo contenga letras y espacios
-    if (!/^[a-zA-Z\s]+$/.test(newNombre)) {
-        alert('Por favor, ingrese un nombre válido que solo contenga letras.');
-        return;
-    }
-
-    // Validar que el salario sea un número positivo
-    if (!/^\d*\.?\d+$/.test(newSalario) || parseFloat(newSalario) < 0) {
-        alert('Por favor, ingrese un salario válido como número positivo.');
-        return;
-    }
-
-    // Confirmar antes de realizar la acción
-    const confirmacion = window.confirm('¿Está seguro que desea guardar el usuario?');
-
-    if (!confirmacion) {
-        return;
-    }
-
-    const postUrl = 'http://ec2-54-166-136-72.compute-1.amazonaws.com/employess';
-
-    const newUserData = {
-        nombre: newNombre,
-        salario: newSalario,
-    };
-
-    const postOptions = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newUserData),
-    };
-
-    fetch(postUrl, postOptions)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Respuesta POST:', data);
-            alert('Usuario agregado exitosamente');
-            location.reload();
-        })
-        .catch(error => console.error('Error en la solicitud POST:', error));
-}
-
-    // Creando una funcion para eliminar al empleado mediante el ID
-     async function eliminarUsuario(id) {
-    const confirmacion = confirm('¿Estás seguro de que quieres eliminar este usuario?');
-
-    if (confirmacion) {
-        const deleteUrl = `http://ec2-54-166-136-72.compute-1.amazonaws.com/employess/${id}`;
-
-        const deleteOptions = {
-            method: 'DELETE',
-        };
-
-        try {
-            const response = await fetch(deleteUrl, deleteOptions);
-            
-            if (response.status === 204) {
-                // La solicitud DELETE fue exitosa (sin contenido)
-                console.log('Usuario eliminado exitosamente');
-                alert('Usuario eliminado exitosamente');
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
-                location.reload();
-            } else {
-                // La respuesta no fue exitosa
-                console.error('Error en la solicitud DELETE. Estado:', response.status);
-            }
-        } catch (error) {
-            console.error('Error en la solicitud DELETE:', error);
-        }
-    }
-}
-
-function openEditModal(id, nombre, salario) {
-  // Poblar el modal con los datos actuales del usuario
-  document.getElementById('newName').value = nombre;
-  document.getElementById('newSalary').value = salario;
-
-  // Mostrar el modal
-  document.getElementById('editModal').style.display = 'block';
-
-  // Guardar los datos actuales en variables globales para su uso en la función editarUsuario
-  window.currentUserId = id;
-  window.currentUserName = nombre;
-  window.currentUserSalary = salario;
-}
-
-function closeModal() {
-  document.getElementById('editModal').style.display = 'none';
-}
-
-function editarUsuario() {
-  const nuevoNombre = document.getElementById('newName').value;
-  const nuevoSalario = document.getElementById('newSalary').value;
-  // Validar que los campos no estén vacíos
-  if (nuevoNombre === '' || nuevoSalario === '') {
-        alert('Por favor, complete todos los campos.');
-        return;
-    }
-
-    // Validar que el nombre solo contenga letras y espacios
-    if (!/^[a-zA-Z\s]+$/.test(nuevoNombre)) {
-        alert('Por favor, ingrese un nombre válido que solo contenga letras.');
-        return;
-    }
-
-    // Validar que el salario sea un número positivo
-    if (!/^\d*\.?\d+$/.test(nuevoSalario) || parseFloat(nuevoSalario) < 0) {
-        alert('Por favor, ingrese un salario válido como número positivo.');
-        return;
-    }
-
-    // Confirmar antes de realizar la acción
-    const confirmacion = window.confirm('¿Está seguro que desea actualizar el usuario?');
-
-    if (!confirmacion) {
-        return;
-    }
-
-  const putUrl = `http://ec2-54-166-136-72.compute-1.amazonaws.com/employess/${window.currentUserId}`;
-
-  const userData = {
-    nombre: nuevoNombre,
-    salario: nuevoSalario,
-  };
-
-  const putOptions = {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData),
-  };
-
-  fetch(putUrl, putOptions)
-    .then(response => response.json())
-    .then(data => {
-      console.log('Respuesta PUT:', data);
-      alert('Usuario actualizado exitosamente');
-      location.reload("index.html"); // Recargar la página después de la operación exitosa
-    })
-    .catch(error => console.error('Error en la solicitud PUT:', error));
-
-  closeModal(); // Cierra el modal después de editar el usuario
-}
-
-
-                        
-</script>
-
                 </div>
-
             </div>
         </div>
     </div>
-    
 </body>
 </html>
