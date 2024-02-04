@@ -89,7 +89,7 @@
                         <tbody class="align-middle"></tbody>
                     </table>
 <script>
-    let url = 'http://54.80.72.235:3000/employess';
+    let url = 'https://cede.onrender.com/employess';
         fetch(url)
             .then(response => response.json())
             .then(data => mostrarData(data))
@@ -141,7 +141,7 @@
         return;
     }
 
-    const postUrl = 'http://54.80.72.235:3000/employess';
+    const postUrl = 'https://cede.onrender.com/employess';
 
     const newUserData = {
         nombre: newNombre,
@@ -171,7 +171,7 @@
     const confirmacion = confirm('¿Estás seguro de que quieres eliminar este usuario?');
 
     if (confirmacion) {
-        const deleteUrl = `http://54.80.72.235:3000/employess/${id}`;
+        const deleteUrl = `https://cede.onrender.com/employess/${id}`;
 
         const deleteOptions = {
             method: 'DELETE',
@@ -242,7 +242,7 @@ function editarUsuario() {
         return;
     }
 
-  const putUrl = `http://54.80.72.235:3000/employess/${window.currentUserId}`;
+  const putUrl = `https://cede.onrender.com/employess/${window.currentUserId}`;
 
   const userData = {
     nombre: nuevoNombre,
