@@ -32,7 +32,7 @@
     </nav>
     
     <script>
-        let url = 'https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess';
+        let url = 'https://cors-anywhere.herokuapp.com/http://54.80.72.235:3000/employess';
 
         const fetchOptions = {
             headers: {
@@ -87,7 +87,7 @@
                 return;
             }
 
-            const postUrl = 'https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess';
+            const postUrl = 'https://cors-anywhere.herokuapp.com/http://54.80.72.235:3000/employess';
 
             const newUserData = {
                 nombre: newNombre,
@@ -116,7 +116,7 @@
             const confirmacion = confirm('¿Estás seguro de que quieres eliminar este usuario?');
 
             if (confirmacion) {
-                const deleteUrl = `https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess/${id}`;
+                const deleteUrl = `https://cors-anywhere.herokuapp.com/http://54.80.72.235:3000/employess/${id}`;
 
                 const deleteOptions = {
                     method: 'DELETE',
@@ -179,7 +179,7 @@
                 return;
             }
 
-            const putUrl = `https://cors-anywhere.herokuapp.com/http://ec2-54-166-136-72.compute-1.amazonaws.com/employess/${window.currentUserId}`;
+            const putUrl = `https://cors-anywhere.herokuapp.com/http://54.80.72.235:3000/employess/${window.currentUserId}`;
 
             const userData = {
                 nombre: nuevoNombre,
